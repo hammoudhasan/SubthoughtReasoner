@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beyond the Last Answer: Your Reasoning Trace Uncovers More than You Think</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #f1f5f9;
+            --accent-color: #5D59FF;
+            --accent-color-light: #7B77FF;
+            --text-color: #2c3e50;
+            --thought-1-color: #7da0ca; /* muted blue */
+            --thought-2-color: #6bb7b7; /* muted teal */
+            --thought-3-color: #a18fc6; /* muted purple */
+            --thought-4-color: #e6c07b; /* muted gold */
+            --thought-5-color: #d6a5b7; /* muted rose */
+            --correct-color: #20bf6b;
+            --wrong-color: #eb3b5a;
+            --bg-gradient-1: #ECE9E6;
+            --bg-gradient-2: #FFFFFF;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--secondary-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color-light);
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-top: 2rem;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: var(--accent-color);
+            border-radius: 2px;
+        }
+
+        .title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeInDown 1s ease-out forwards;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 0.5s forwards;
+        }
+
+        .authors {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 0.8s forwards;
+        }
+
+        .authors a {
+            color: var(--primary-color);
+            text-decoration: none;
+            margin: 0 0.8rem;
+            position: relative;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .authors a:hover {
+            color: var(--accent-color);
+        }
+
+        .authors a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 0;
+            background-color: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        .authors a:hover::after {
+            width: 100%;
+        }
+
+        .links {
+            margin-top: 1.5rem;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 1.1s forwards;
+        }
+
+        .links a {
+            display: inline-flex;
+            align-items: center;
+            margin: 0 1rem;
+            padding: 0.6rem 1.2rem;
+            background-color: white;
+            color: var(--primary-color);
+            text-decoration: none;
+            border-radius: 30px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .links a:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow-hover);
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .links i {
+            font-size: 1.2rem;
+            margin-right: 0.6rem;
+        }
+
+        /* Abstract Section */
+        .abstract-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.5s;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideUp 1s ease-out 1.5s forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .abstract-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--accent-color), var(--accent-color-light));
+            border-top-left-radius: 15px;
+            border-bottom-left-radius: 15px;
+        }
+
+        .abstract-container:hover {
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-5px);
+        }
+
+        .abstract-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            position: relative;
+        }
+
+        .abstract-heading::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 1.5px;
+        }
+
+        .abstract-content {
+            font-size: 1.1rem;
+            text-align: justify;
+            line-height: 1.8;
+            color: var(--text-color);
+        }
+
+        /* Methodology Section - NEW */
+        .methodology-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.5s;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideUp 1s ease-out 1.7s forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .methodology-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--accent-color), var(--accent-color-light));
+            border-top-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+
+        .methodology-container:hover {
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-5px);
+        }
+
+        .methodology-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            position: relative;
+        }
+
+        .methodology-heading::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 1.5px;
+        }
+
+        .methodology-intro {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+            line-height: 1.8;
+        }
+
+        .methodology-steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: space-between;
+        }
+
+        .methodology-step {
+            flex: 1 1 220px;
+            display: flex;
+            flex-direction: column;
+            padding: 1.8rem;
+            background-color: var(--secondary-color);
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: fadeInStep 0.5s ease-out forwards;
+        }
+
+        .methodology-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .step-1 { animation-delay: 2.1s; }
+        .step-2 { animation-delay: 2.3s; }
+        .step-3 { animation-delay: 2.5s; }
+        .step-4 { animation-delay: 2.7s; }
+
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            width: 34px;
+            height: 34px;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(93, 89, 255, 0.3);
+        }
+
+        .step-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.7rem;
+            color: var(--primary-color);
+        }
+
+        .step-description {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .animation-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 3s forwards;
+        }
+
+        @keyframes fadeInStep {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Animation Section */
+        .animation-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideUp 1s ease-out 2s forwards;
+            overflow: hidden;
+        }
+
+        .animation-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: radial-gradient(circle at top right, rgba(93, 89, 255, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .question-box {
+            background: linear-gradient(to right, var(--secondary-color), #ffffff);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transform: scale(0.9);
+            opacity: 0;
+            animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) 2.5s forwards;
+            position: relative;
+        }
+
+        .question-box::before {
+            content: 'Question';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: var(--accent-color);
+            color: white;
+            padding: 0.2rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .question {
+            font-size: 1.3rem;
+            font-weight: 500;
+            line-height: 1.8;
+            color: var(--primary-color);
+        }
+
+        .thought-container {
+            position: relative;
+            margin-bottom: 2.5rem;
+            opacity: 0;
+            transform: translateX(-50px) scale(0.95);
+        }
+
+        .thought-arrow {
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 60px;
+            height: 30px;
+            opacity: 0;
+        }
+
+        .thought-arrow::before {
+            content: '';
+            position: absolute;
+            width: 45px;
+            height: 3px;
+            background-color: var(--accent-color);
+            top: 50%;
+            left: 0;
+            border-radius: 3px;
+        }
+
+        .thought-arrow::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-top: 3px solid var(--accent-color);
+            border-right: 3px solid var(--accent-color);
+            transform: rotate(45deg);
+            top: calc(50% - 6px);
+            right: 5px;
+            border-radius: 2px;
+        }
+
+        .thought-box {
+            background-color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-left: 0 !important;
+            position: relative;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.5s;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .thought-box:hover {
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            transform: translateY(-5px);
+        }
+
+        .think-tag {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
+            animation-delay: 0.3s;
+        }
+
+        .think {
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding: 0.5rem;
+        }
+
+        .thought {
+            display: inline-block;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            line-height: 1.7;
+            margin-bottom: 0.8rem;
+            color: white;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out forwards;
+            animation-delay: 0.5s;
+            position: relative;
+        }
+
+        /* Solution row for right alignment */
+        .solution-row {
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
+            margin-top: 2.2em;
+            margin-bottom: 0.2em;
+        }
+
+        /* Solution pill styling - improved aesthetics */
+        .solution {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8em;
+            background: linear-gradient(100deg, #fffbe7 60%, #f7f7fa 100%);
+            color: #2c3e50;
+            border-radius: 2.5em;
+            padding: 0.85em 2em 0.85em 1.5em;
+            font-size: 1.18em;
+            font-weight: 700;
+            box-shadow: 0 6px 32px 0 rgba(93, 89, 255, 0.13), 0 2px 8px 0 rgba(0,0,0,0.06);
+            border: 2.5px solid var(--accent-color);
+            opacity: 0;
+            transform: scale(0.8);
+            animation: solutionPop 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation-delay: 1.2s;
+            letter-spacing: 0.01em;
+            transition: box-shadow 0.2s;
+        }
+        .solution:hover {
+            box-shadow: 0 10px 40px 0 rgba(93, 89, 255, 0.18), 0 4px 16px 0 rgba(0,0,0,0.10);
+        }
+        .solution i {
+            font-size: 1.3em;
+            color: var(--accent-color);
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08));
+        }
+        @keyframes solutionPop {
+            0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+            60% { opacity: 1; transform: scale(1.08) translateY(-4px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Thought colors */
+        .thought-1 { 
+            background-color: var(--thought-1-color); 
+        }
+        .thought-2 { 
+            background-color: var(--thought-2-color); 
+        }
+        .thought-3 { 
+            background-color: var(--thought-3-color); 
+        }
+        .thought-4 { 
+            background-color: var(--thought-4-color); 
+        }
+        .thought-5 { 
+            background-color: var(--thought-5-color); 
+        }
+
+        /* Glow for each thought box */
+        .thought-box-1 {
+            box-shadow: 0 0 16px 4px var(--thought-1-color), 0 2px 20px 0 rgba(0,0,0,0.07);
+        }
+        .thought-box-2 {
+            box-shadow: 0 0 16px 4px var(--thought-2-color), 0 2px 20px 0 rgba(0,0,0,0.07);
+        }
+        .thought-box-3 {
+            box-shadow: 0 0 16px 4px var(--thought-3-color), 0 2px 20px 0 rgba(0,0,0,0.07);
+        }
+        .thought-box-4 {
+            box-shadow: 0 0 16px 4px var(--thought-4-color), 0 2px 20px 0 rgba(0,0,0,0.07);
+        }
+        .thought-box-5 {
+            box-shadow: 0 0 16px 4px var(--thought-5-color), 0 2px 20px 0 rgba(0,0,0,0.07);
+        }
+
+        /* Result Section */
+        .result-box {
+            background: linear-gradient(to right, var(--secondary-color), #ffffff);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem auto;
+            text-align: center;
+            max-width: 600px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            opacity: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            position: relative;
+            display: inline-block;
+        }
+
+        .result-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 1.5px;
+        }
+
+        .result-items {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .result-item {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.3rem;
+            min-width: 200px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            transform: scale(0);
+            position: relative;
+        }
+
+        .result-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 12px;
+            z-index: -1;
+            opacity: 0.8;
+            transition: all 0.3s;
+        }
+
+        .result-item:hover {
+            transform: translateY(-5px) scale(1.05);
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .correct {
+            color: white;
+            background-color: var(--correct-color);
+        }
+
+        .wrong {
+            color: white;
+            background-color: var(--wrong-color);
+        }
+
+        .status-tag {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            margin-top: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .status-correct {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .status-wrong {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Findings Section */
+        .findings-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.5s;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideUp 1s ease-out 3s forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .findings-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 6px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--thought-3-color), var(--thought-2-color));
+            border-top-right-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+
+        .findings-container:hover {
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-5px);
+        }
+
+        .findings-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            position: relative;
+        }
+
+        .findings-heading::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background: var(--thought-3-color);
+            border-radius: 1.5px;
+        }
+
+        .findings-content {
+            min-height: auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .finding-item {
+            background-color: var(--secondary-color);
+            border-radius: 12px;
+            padding: 1.8rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.5s;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: findingAppear 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .finding-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .finding-1 { animation-delay: 3.6s; }
+        .finding-2 { animation-delay: 3.9s; }
+        .finding-3 { animation-delay: 4.2s; }
+
+        .finding-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            margin-bottom: 1.2rem;
+            position: relative;
+            padding-bottom: 0.8rem;
+        }
+
+        .finding-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 1.5px;
+        }
+
+        .finding-description {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+        }
+
+        .finding-figure {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 0.5rem;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .finding-figure:hover {
+            transform: scale(1.02);
+        }
+
+        @keyframes findingAppear {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (min-width: 768px) {
+            .findings-content {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+
+        /* Citation Section */
+        .citation-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.5s;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideUp 1s ease-out 3.5s forwards;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .citation-container::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(to right, var(--accent-color), var(--accent-color-light));
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+
+        .citation-container:hover {
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-5px);
+        }
+
+        .citation-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            position: relative;
+        }
+
+        .citation-heading::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 1.5px;
+        }
+
+        .citation-content {
+            font-family: monospace;
+            background-color: var(--secondary-color);
+            padding: 1.5rem;
+            border-radius: 10px;
+            white-space: pre-wrap;
+            font-size: 1rem;
+            line-height: 1.6;
+            border-left: 4px solid var(--accent-color);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from { 
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from { 
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes popIn {
+            0% { 
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            50% { 
+                transform: scale(1.05);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInRight {
+            from { 
+                transform: translateX(-50px) scale(0.95);
+                opacity: 0;
+            }
+            to { 
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInArrow {
+            from { opacity: 0; width: 0; }
+            to { opacity: 1; width: 60px; }
+        }
+
+        @keyframes expandWidth {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes popScale {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Animation triggers */
+        #thought-1 {
+            animation: slideInRight 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 3s forwards;
+        }
+        #thought-1 .thought-arrow {
+            animation: fadeInArrow 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 3.5s forwards;
+        }
+
+        #thought-2 {
+            animation: slideInRight 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 4.5s forwards;
+        }
+        #thought-2 .thought-arrow {
+            animation: fadeInArrow 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 5s forwards;
+        }
+
+        #thought-3 {
+            animation: slideInRight 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 6s forwards;
+        }
+        #thought-3 .thought-arrow {
+            animation: fadeInArrow 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 6.5s forwards;
+        }
+
+        #thought-4 {
+            animation: slideInRight 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 7.5s forwards;
+        }
+        #thought-4 .thought-arrow {
+            animation: fadeInArrow 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 8s forwards;
+        }
+
+        #thought-5 {
+            animation: slideInRight 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 9s forwards;
+        }
+        #thought-5 .thought-arrow {
+            animation: fadeInArrow 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) 9.5s forwards;
+        }
+
+        #result-box {
+            animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) 10.5s forwards;
+        }
+
+        #result-wrong {
+            animation: popScale 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 11s forwards;
+        }
+
+        #result-correct {
+            animation: popScale 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 11.5s forwards;
+        }
+
+        /* Floating decorative elements */
+        .decorator {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.5;
+            z-index: -1;
+            filter: blur(20px);
+        }
+
+        .decorator-1 {
+            width: 300px;
+            height: 300px;
+            background-color: var(--thought-1-color);
+            opacity: 0.08;
+            top: 10%;
+            left: -10%;
+            animation: floatAnimation 15s ease-in-out infinite;
+        }
+
+        .decorator-2 {
+            width: 200px;
+            height: 200px;
+            background-color: var(--thought-3-color);
+            opacity: 0.06;
+            bottom: 30%;
+            right: -5%;
+            animation: floatAnimation 18s ease-in-out infinite 2s;
+        }
+
+        .decorator-3 {
+            width: 150px;
+            height: 150px;
+            background-color: var(--accent-color);
+            opacity: 0.07;
+            bottom: 10%;
+            left: 10%;
+            animation: floatAnimation 12s ease-in-out infinite 1s;
+        }
+
+        @keyframes floatAnimation {
+            0% { transform: translate(0, 0) rotate(0); }
+            25% { transform: translate(20px, 15px) rotate(5deg); }
+            50% { transform: translate(10px, 30px) rotate(0); }
+            75% { transform: translate(-10px, 15px) rotate(-5deg); }
+            100% { transform: translate(0, 0) rotate(0); }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            .title {
+                font-size: 2.8rem;
+            }
+            
+            .thought-box {
+                margin-left: 70px;
+                padding: 1.5rem;
+            }
+            
+            .thought-arrow {
+                left: 20px;
+            }
+            
+            .animation-container {
+                padding: 2rem;
+            }
+            #thought-2 { margin-left: 25px; }
+            #thought-3 { margin-left: 50px; }
+            #thought-4 { margin-left: 75px; }
+            #thought-5 { margin-left: 100px; }
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.2rem;
+            }
+            
+            .thought-box {
+                margin-left: 50px;
+            }
+            
+            .thought {
+                font-size: 0.9rem;
+            }
+            
+            .result-items {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .result-item {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .abstract-content, .findings-content, .citation-content {
+                font-size: 0.95rem;
+            }
+            #thought-2 { margin-left: 15px; }
+            #thought-3 { margin-left: 30px; }
+            #thought-4 { margin-left: 45px; }
+            #thought-5 { margin-left: 60px; }
+        }
+
+        @media (max-width: 576px) {
+            .title {
+                font-size: 1.8rem;
+            }
+            
+            .authors a {
+                display: block;
+                margin: 0.5rem 0;
+            }
+            
+            .links a {
+                display: block;
+                margin: 0.8rem auto;
+                max-width: 200px;
+            }
+            
+            .thought-box {
+                margin-left: 30px;
+                padding: 1rem;
+            }
+            
+            .thought-arrow {
+                left: 10px;
+            }
+            #thought-2 { margin-left: 5px; }
+            #thought-3 { margin-left: 10px; }
+            #thought-4 { margin-left: 15px; }
+            #thought-5 { margin-left: 20px; }
+        }
+
+        /* Add new modal styles */
+        .finding-figure {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 0.5rem;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .finding-figure:hover {
+            transform: scale(1.02);
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
+            border: none;
+            outline: none;
+        }
+
+        .modal-close:hover {
+            transform: rotate(90deg);
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .modal-caption {
+            color: white;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 30px;
+            font-size: 1rem;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        /* Prevent body scrolling when modal is open */
+        body.modal-open {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="decorator decorator-1"></div>
+    <div class="decorator decorator-2"></div>
+    <div class="decorator decorator-3"></div>
+
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <h1 class="title">Beyond the Last Answer: Your Reasoning Trace Uncovers More than You Think</h1>
+            <!-- <p class="subtitle">Exploring the Convergence of Thought</p> -->
+            <div class="authors">
+                <a href="mailto:hasanabedalkader.hammoud@kaust.edu.sa" title="Correspondence">Hasan Abed Al Kader Hammoud</a> <span style="color:#aaa;">(KAUST)</span> •
+                <span>Hani Itani <span style="color:#aaa;">(KAUST)</span></span> •
+                <span>Bernard Ghanem <span style="color:#aaa;">(KAUST)</span></span>
+            </div>
+            <div class="links">
+                <a href="https://arxiv.org" target="_blank">
+                    <i class="fas fa-file-pdf"></i> arXiv Paper
+                </a>
+                <a href="https://github.com" target="_blank">
+                    <i class="fab fa-github"></i> GitHub Repository
+                </a>
+            </div>
+        </div>
+
+        <!-- Abstract Section -->
+        <div class="abstract-container">
+            <h2 class="abstract-heading">Abstract</h2>
+            <p class="abstract-content">
+                Large Language Models (LLMs) typically solve complex problems through step-by-step reasoning, with evaluations focused on the final answer. We challenge this by asking: Does the final answer truly reflect the model's best conclusion? Can different reasoning paths lead to better results? We introduce a method that segments reasoning traces into subthoughts and generates alternative continuations from each. Aggregating answers across subthoughts—by choosing the most frequent one—improves accuracy significantly over using only the final answer. Experiments on mathematical reasoning datasets (AIME2024, AIME2025) show consistent gains of up to 13% and 10%.</p>
+        </div>
+
+        <!-- Methodology Section - NEW -->
+        <div class="methodology-container">
+            <h2 class="methodology-heading">Our Approach</h2>
+            <p class="methodology-intro">
+                Traditional evaluation of language models considers only the final answer of a reasoning process. Our method analyzes intermediate reasoning steps (subthoughts) to extract a more reliable consensus answer.
+            </p>
+            <div class="methodology-steps">
+                <div class="methodology-step step-1">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Generate Initial Trace</div>
+                    <div class="step-description">
+                        Generate a complete reasoning trace for a problem using standard greedy decoding, capturing the model's step-by-step thinking process.
+                    </div>
+                </div>
+                
+                <div class="methodology-step step-2">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Segment into Subthoughts</div>
+                    <div class="step-description">
+                        Split the trace into sequential subthoughts based on linguistic cues like "Wait," "Alternatively," "Let me think," that signal progression in reasoning.
+                    </div>
+                </div>
+                
+                <div class="methodology-step step-3">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Generate Completions</div>
+                    <div class="step-description">
+                        Prompt the model to complete the reasoning and provide an answer after each intermediate subthought, resulting in a distribution of answers.
+                    </div>
+                </div>
+                
+                <div class="methodology-step step-4">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Extract Mode Answer</div>
+                    <div class="step-description">
+                        Extract the most frequently occurring answer (the mode) from all generated continuations for more reliable results than the final answer alone.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Animation Section -->
+        <div class="animation-container">
+            <div class="animation-title">Visualization of Subthought Analysis in Action</div>
+            <div class="question-box">
+                <p class="question">The length of a rectangular garden is 12 meters, and the width is 8 meters. What is the area of the garden?</p>
+            </div>
+
+            <!-- Thought 1 -->
+            <div id="thought-1" class="thought-container">
+                <div class="thought-arrow"></div>
+                <div class="thought-box thought-box-1">
+                    <div class="think-tag">&lt;think&gt;</div>
+                    <div class="think">
+                        <div class="thought thought-1">First, to find the area of a rectangle, I need to multiply its length by its width.</div>
+                    </div>
+                    <div class="think-tag" style="opacity: 0; animation-delay: 1s;">&lt;/think&gt;</div>
+                    <div class="solution-row"><div class="solution"><i class="fas fa-lightbulb"></i> Solution 1: 20</div></div>
+                </div>
+            </div>
+
+            <!-- Thought 2 -->
+            <div id="thought-2" class="thought-container">
+                <div class="thought-arrow"></div>
+                <div class="thought-box thought-box-2">
+                    <div class="think-tag">&lt;think&gt;</div>
+                    <div class="think">
+                        <div class="thought thought-1">First, to find the area of a rectangle, I need to multiply its length by its width.</div>
+                        <div class="thought thought-2">Hmm, the length of the rectangle is 12 meters and the width is 8 meters. I'll calculate the area as length × width = 12 × 8.</div>
+                    </div>
+                    <div class="think-tag" style="opacity: 0; animation-delay: 1s;">&lt;/think&gt;</div>
+                    <div class="solution-row"><div class="solution"><i class="fas fa-lightbulb"></i> Solution 2: 90</div></div>
+                </div>
+            </div>
+
+            <!-- Thought 3 -->
+            <div id="thought-3" class="thought-container">
+                <div class="thought-arrow"></div>
+                <div class="thought-box thought-box-3">
+                    <div class="think-tag">&lt;think&gt;</div>
+                    <div class="think">
+                        <div class="thought thought-1">First, to find the area of a rectangle, I need to multiply its length by its width.</div>
+                        <div class="thought thought-2">Hmm, the length of the rectangle is 12 meters and the width is 8 meters. I'll calculate the area as length × width = 12 × 8.</div>
+                        <div class="thought thought-3">So, computing 12 × 8 = 96. So the area of the rectangular garden is 96 square meters.</div>
+                    </div>
+                    <div class="think-tag" style="opacity: 0; animation-delay: 1s;">&lt;/think&gt;</div>
+                    <div class="solution-row"><div class="solution"><i class="fas fa-lightbulb"></i> Solution 3: 96</div></div>
+                </div>
+            </div>
+
+            <!-- Thought 4 -->
+            <div id="thought-4" class="thought-container">
+                <div class="thought-arrow"></div>
+                <div class="thought-box thought-box-4">
+                    <div class="think-tag">&lt;think&gt;</div>
+                    <div class="think">
+                        <div class="thought thought-1">First, to find the area of a rectangle, I need to multiply its length by its width.</div>
+                        <div class="thought thought-2">Hmm, the length of the rectangle is 12 meters and the width is 8 meters. I'll calculate the area as length × width = 12 × 8.</div>
+                        <div class="thought thought-3">So, computing 12 × 8 = 96. So the area of the rectangular garden is 96 square meters.</div>
+                        <div class="thought thought-4">Let me double-check this calculation. The formula for the area of a rectangle is length × width. With length = 12 meters and width = 8 meters, we get 12 × 8 = 96 square meters.</div>
+                    </div>
+                    <div class="think-tag" style="opacity: 0; animation-delay: 1s;">&lt;/think&gt;</div>
+                    <div class="solution-row"><div class="solution"><i class="fas fa-lightbulb"></i> Solution 4: 96</div></div>
+                </div>
+            </div>
+
+            <!-- Thought 5 -->
+            <div id="thought-5" class="thought-container">
+                <div class="thought-arrow"></div>
+                <div class="thought-box thought-box-5">
+                    <div class="think-tag">&lt;think&gt;</div>
+                    <div class="think">
+                        <div class="thought thought-1">First, to find the area of a rectangle, I need to multiply its length by its width.</div>
+                        <div class="thought thought-2">Hmm, the length of the rectangle is 12 meters and the width is 8 meters. I'll calculate the area as length × width = 12 × 8.</div>
+                        <div class="thought thought-3">So, computing 12 × 8 = 96. So the area of the rectangular garden is 96 square meters.</div>
+                        <div class="thought thought-4">Let me double-check this calculation. The formula for the area of a rectangle is length × width. With length = 12 meters and width = 8 meters, we get 12 × 8 = 96 square meters.</div>
+                        <div class="thought thought-5">Actually, I think 12 x 8 is 50 not 96 square meters.</div>
+                    </div>
+                    <div class="think-tag" style="opacity: 0; animation-delay: 1s;">&lt;/think&gt;</div>
+                    <div class="solution-row"><div class="solution"><i class="fas fa-lightbulb"></i> Solution 5: 50</div></div>
+                </div>
+            </div>
+
+            <!-- Result -->
+            <div id="result-box" class="result-box">
+                <h3 class="result-title">Results Analysis</h3>
+                <div class="result-items">
+                    <div id="result-wrong" class="result-item wrong">
+                        <span class="result-label">Last Answer</span>
+                        Alast = 50
+                        <span class="status-tag status-wrong">Wrong Answer</span>
+                    </div>
+                    <div id="result-correct" class="result-item correct">
+                        <span class="result-label">Mode Answer</span>
+                        Amode = 96
+                        <span class="status-tag status-correct">Correct Answer</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Findings Section -->
+        <div class="findings-container">
+            <h2 class="findings-heading">Key Findings</h2>
+            <div class="findings-content">
+                <div class="finding-item finding-1">
+                    <h3 class="finding-title">Answer Evolution Patterns</h3>
+                    <p class="finding-description">
+                        The evolution of answers across subthoughts reveals distinct patterns: consistent correctness, fluctuating incorrectness, and cases where the mode answer corrects the final answer error.
+                    </p>
+                    <img src="New Project (11).png" alt="Answer evolution patterns showing consistent, fluctuating, and correcting patterns" class="finding-figure" onclick="openModal(this.src, this.alt)">
+                </div>
+                
+                <div class="finding-item finding-2">
+                    <h3 class="finding-title">Answer Distribution Entropy</h3>
+                    <p class="finding-description">
+                        The entropy of answer distributions is significantly lower for correctly solved problems than for incorrectly solved ones, indicating that answer consistency signals reliability.
+                    </p>
+                    <img src="New Project (12).png" alt="Entropy comparison between correct and incorrect answers" class="finding-figure" onclick="openModal(this.src, this.alt)">
+                </div>
+                
+                <div class="finding-item finding-3">
+                    <h3 class="finding-title">Accuracy Improvements</h3>
+                    <p class="finding-description">
+                        Using the most frequent answer (mode) from subthought completions consistently outperforms the baseline, with accuracy gains of up to 13% on AIME2024 and 10% on AIME2025.
+                    </p>
+                    <img src="New Project (13).png" alt="Accuracy improvements across different models" class="finding-figure" onclick="openModal(this.src, this.alt)">
+                </div>
+            </div>
+        </div>
+
+        <!-- Citation Section -->
+        <div class="citation-container">
+            <h2 class="citation-heading">Citation</h2>
+            <pre class="citation-content">@article{hammoud2025beyond,
+  title   = {Beyond the Last Answer: Your Reasoning Trace Uncovers More than You Think},
+  author  = {Hasan Abed Al Kader Hammoud and Hani Itani and Bernard Ghanem},
+  journal = {arXiv preprint arXiv},
+  year    = {2025},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI}
+}</pre>
+        </div>
+    </div>
+
+    <!-- Add a modal for image viewing -->
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <img src="" class="modal-image" id="modalImage" alt="">
+            <div class="modal-caption" id="modalCaption"></div>
+        </div>
+    </div>
+
+    <!-- Add modal JavaScript -->
+    <script>
+        // Modal functionality
+        function openModal(imageSrc, imageAlt) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            const modalCaption = document.getElementById('modalCaption');
+            
+            // Set the image source and caption
+            modalImg.src = imageSrc;
+            modalCaption.textContent = imageAlt;
+            
+            // Show the modal
+            modal.classList.add('active');
+            document.body.classList.add('modal-open');
+            
+            // Close on escape key
+            document.addEventListener('keydown', handleEscKey);
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('active');
+            document.body.classList.remove('modal-open');
+            
+            // Remove escape key listener
+            document.removeEventListener('keydown', handleEscKey);
+        }
+        
+        function handleEscKey(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        }
+        
+        // Close modal when clicking outside the image
+        document.getElementById('imageModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html> 
